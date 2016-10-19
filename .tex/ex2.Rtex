@@ -1,0 +1,148 @@
+We are going to use the Metropolis-Hastings algorithm to generate a Markov Chain with limiting distribution given by the binomial distribution Binomial$(n,p)$ with probability distribution
+
+\begin{equation}
+    \pi(x) = \frac{n!}{x!(n-x)!}p^x(1-p)^{n-x},
+\end{equation}
+
+for $x = 0,1, \hdots ,n$, $n\in{\N}$ and $p\in{[0,1]}$. Assuming the present state of the Markov chain is $X_{n-1}$ we propose a new state $X^\star$ based on the following proposal distribution:
+
+\begin{equation}
+\begin{split}
+    Q(X^\star \given X_{n-1} = 0) &= 
+    \begin{cases} 
+        \frac{1}{2} & \text{for } X^\star \in{\{0, 1\}} \\
+        0 & \text{otherwise }  \\
+    \end{cases}
+    \\
+    Q(X^\star \given X_{n-1} = k) &= 
+    \begin{cases} 
+        \frac{1}{2} & \text{for } X^\star \in{\{k-1, k+1\}} \\
+        0 & \text{otherwise }  \\
+    \end{cases}
+    \text{  with } 0 < k < n
+    \\
+    Q(X^\star \given X_{n-1} = n) &= 
+    \begin{cases} 
+        \frac{1}{2} & \text{for } X^\star \in{\{n-1, n\}} \\
+        0 & \text{otherwise.}  \\
+    \end{cases}
+\end{split}
+\end{equation}}
+
+This can also be denoted as a transition probability matrix
+
+\begin{equation}
+Q = 
+\begin{bmatrix}
+    \frac{1}{2} & \frac{1}{2} & 0 & 0 & \hdots & 0 \\
+    \frac{1}{2} & 0 & \frac{1}{2} & 0 & \hdots & 0 \\
+    0 & \frac{1}{2} & 0 & \frac{1}{2} & \hdots & 0 \\
+    \vdots & & \ddots & \ddots & \ddots & \vdots \\
+    0 & \hdots & 0 & \frac{1}{2} & 0 & \frac{1}{2}\\
+    0 & \hdots & 0 & 0 & \frac{1}{2} & \frac{1}{2} \\
+    
+\end{bmatrix}
+,
+\end{equation}
+
+which is clearly irreducible. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{}
+Let $q_{ij}$ denote the row i column j element of $Q$. According to the Metropolis-Hastings algorithm, we can define a time reversible Markov chain ${X_n, n \geq 0}$ as follows: When $X_n = i$, let $Y$ be a random variable such that $Y = j$ with probability $P(Y = y) = q_{ij}$ for $j = 0, 1, \hdots, n$. Then let $P(X_{n+1} = j) = \alpha_{ij}$ and $P(X_{n+1} = i) = 1-\alpha_{ij}$, where we define $\alpha_{ij}$ as follows:
+
+\begin{equation}
+\begin{split}
+    \alpha_{ij} &= 
+    \begin{cases}
+        \min \biggl(\dfrac{\pi(j) q_{ji}}{\pi(i) q_{ij}}, 1\biggr) & \text{for } q_{ij} \neq 0 \\
+        0 & \text{for } q_{ij} = 0 \\
+    \end{cases}
+    \\
+                &= 
+    \begin{cases}
+        \min \biggl(\dfrac{i!(n-i)!}{j!(n-j)!} \biggl(\dfrac{1-p}{p}\biggr)^{i-j}, 1\biggr) & \text{for } q_{ij} \neq 0 \\
+        0 & \text{for } q_{ij} = 0 \\
+    \end{cases}
+    ,
+\end{split}
+\end{equation}
+
+where we have used $q_{ij} = q_{ji}$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{}
+
+The transition probabilities $P_{ij} = P(X_{n} = j \given X_{n-1} = i)$ of the generated Markov chain are given by
+
+\begin{itemize}
+    \item 
+    if $i \neq j$:
+    \begin{equation}
+    \begin{split}
+        P_{ij}  &=
+            q_{ij} \alpha_{ij}
+        \\
+                &=
+            q_{ij} \min \biggl(\dfrac{i!(n-i)!}{j!(n-j)!} \biggl(\dfrac{1-p}{p}\biggr)^{i-j}, 1\biggr)
+        \\
+    \end{split}
+    \end{equation}
+    \item
+    if i = j:
+    \begin{equation}
+    \begin{split}
+        P_{ii}  &=
+            q_{ii} + \sum_{k \neq i} q_{ik}(1-\alpha_{ik})
+        \\
+                &=
+        \begin{cases}
+            1 - \frac{1}{2} \min\biggl(n\dfrac{p}{1-p}, 1\biggr) & \text{for i = 0} \\
+            1 - \frac{1}{2} \min\biggl(\dfrac{i}{n-i+1} \dfrac{1-p}{p}, 1\biggr) - \frac{1}{2} \min\biggl(\dfrac{n-i}{i+1} \dfrac{p}{1-p}, 1\biggr) & \text{for } 0<i<n \\
+            1 - \frac{1}{2} \min\biggl(n\dfrac{1-p}{p}, 1\biggr) & \text{for i = n} \\
+        \end{cases}
+    \end{split}
+    \end{equation}
+\end{itemize}
+
+If $\pi(i)$ for $i \in{0, 1, \hdtos, n}$ are indeed the stationary probabilites of the Markov chain, they should satisfy the following equation:
+
+\begin{equation}
+    \label{eq:statprob}
+    \pi(i) P_{ij} = \pi(j) P_{ji} \iff \pi(i) q_{ij} \alpha_{ij} = \pi(j) q_{ji} \alpha_{ji}
+\end{equation}
+
+For all $i = j$ and for all $q_{ij} = 0$ (since $q_{ij} = q_{ji}$), \eqref{eq:statprob} is obviously satisfied, so we are left with $0<i<n$, $j = i \pm 1$; $i=0$, $j=1$ and $i=n$, $j=n-1$. Noting that, for these values of $i$ and $j$,
+
+\begin{equation}
+    \dfrac{q_{ij}}{q_{ji}} = 1 \quad \mathrm{and} \quad \dfrac{\pi(j)}{\pi(i)} = \dfrac{i!(n-i)!}{j!(n-j)!} \biggl(\dfrac{1-p}{p}\biggr)^{i-j},
+\end{equation}
+
+we see that assuming
+
+\begin{equation}
+    & \alpha_{ji} = \min\biggl(\dfrac{j!(n-j)!}{i!(n-i)!} \biggl(\dfrac{1-p}{p}\biggr)^{j-i}, 1\biggr) = 1
+\end{equation}
+
+implies
+
+\begin{equation}
+    \alpha_{ij} = \dfrac{i!(n-i)!}{j!(n-j)!} \biggl(\dfrac{1-p}{p}\biggr)^{i-j} = \dfrac{\pi(j)}{\pi(i)} \dfrac{q_{ji}}{q_{ij}} \alpha_{ji},
+\end{equation}
+
+and vice versa with $\alpha_{ji} = 1$. Thus \eqref{eq:statprob} is satisfied. Since $P_{ii} > 0$ for some $i$ (namely $i = \{0, n\}$), the stationary probabilities are also the limiting probabilities. So the Markov chain converges to the desired distribution Binomial$(n,p)$.
+
+% \begin{equation}
+% \begin{split}
+%     \dfrac{\pi_i}{\pi_j}    &=
+%         \dfrac  {\min \biggl(\dfrac{j!(n-j)!}{i!(n-i)!}                               \biggl(\dfrac{1-p}{p}\biggr)^{j-i}, 1\biggr)}
+%                 {\min \biggl(\dfrac{i!(n-i)!}{j!(n-j)!} \biggl(\dfrac{1-p}{p}\biggr)^{i-j}, 1\biggr)}
+%     \\
+%                             &=
+%         {\min \biggl(\dfrac{j!(n-j)!}{i!(n-i)!}                               \biggl(\dfrac{1-p}{p}\biggr)^{j-i}, 1\biggr)}
+%     \\
+%                             &=
+%         \dfrac{\pi(i)}{\pi(j)}.
+% \end{split}
+% \end{equation}
+
