@@ -24,10 +24,11 @@
 \date{Fall 2016}
 
 \begin{document}
+
 \maketitle
 \tableofcontents
 \newpage
-hvj
+
 \section{Discrete-time Markov chains}
 \input{ex1.tex}
 \section{Markov chain Monte Carlo}
