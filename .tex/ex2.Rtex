@@ -70,7 +70,7 @@ Let $q_{ij}$ denote the row i column j element of $Q$. According to the Metropol
 
 where we have used $q_{ij} = q_{ji}$.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{}
 
 The transition probabilities $P_{ij} = P(X_{n} = j \given X_{n-1} = i)$ of the generated Markov chain are given by
@@ -132,17 +132,9 @@ implies
 
 and vice versa with $\alpha_{ji} = 1$. Thus \eqref{eq:statprob} is satisfied. Since $P_{ii} > 0$ for some $i$ (namely $i = \{0, n\}$), the stationary probabilities are also the limiting probabilities. So the Markov chain converges to the desired distribution Binomial$(n,p)$.
 
-% \begin{equation}
-% \begin{split}
-%     \dfrac{\pi_i}{\pi_j}    &=
-%         \dfrac  {\min \biggl(\dfrac{j!(n-j)!}{i!(n-i)!}                               \biggl(\dfrac{1-p}{p}\biggr)^{j-i}, 1\biggr)}
-%                 {\min \biggl(\dfrac{i!(n-i)!}{j!(n-j)!} \biggl(\dfrac{1-p}{p}\biggr)^{i-j}, 1\biggr)}
-%     \\
-%                             &=
-%         {\min \biggl(\dfrac{j!(n-j)!}{i!(n-i)!}                               \biggl(\dfrac{1-p}{p}\biggr)^{j-i}, 1\biggr)}
-%     \\
-%                             &=
-%         \dfrac{\pi(i)}{\pi(j)}.
-% \end{split}
-% \end{equation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{}
 
+<<echo=FALSE, cache=FALSE>>=
+read_chunk("binomial_markov_chain.R")
+@
