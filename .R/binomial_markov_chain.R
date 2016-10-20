@@ -1,3 +1,4 @@
+## ---- binomial_markov_chain_function
 binomial_markov_chain <- function(n, p, chain_length) {
   
   Q <- matrix(0, n+1, n+1)
