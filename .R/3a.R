@@ -26,38 +26,42 @@ mean(W)
 ## ---- simulations
 ## Part 3: Plotting 100 Poisson processes as a function of time
 
-# Looking at 100 Poisson processes the first 6 days
+# Function for generating one poisson process with Poisson
+# parameter lambda, up to time t_max
+pp_realizations <- function(lambda=1, t_max) {
+  # N(t=0) = 0, the first axiom of Poisson processes
+  t <- c(0)
+  repeat{
+    # Generate the next event's arrival time as the
+    # previous arrival time plus an exponentially
+    # distributed interarrival time
+    new_t = t[length(t)] + rexp(n=1, rate=lambda)
+    if(new_t <= t_max){
+      t <- c(t, new_t)
+    }
+    else{
+      # t_max has been reached,
+      # and this process simulation is finished
+      return(c(t, new_t))
+    }
+  }
+}
+
+# Looking at 100 Poisson processes the first 30 days
 processes = 100
-t_max = 6
+t_max = 35 # Calculating a bit past the t cutoff point of the plotting area
 
 # Specifying data types and which data to plot
 require(ggplot2)
 df <- data.frame(t = numeric(), N = numeric())
 g <- ggplot(df, aes(t, N))
 
-# Generating the 100 independent Poisson processes
+# Generating the 100 independent Posson processes
 for(b in 1:100){
-    # N(t=0) = 0, the first axiom of Poisson processes
-    t <- c(0)
-    repeat{
-        # Generate the next event's arrival time as the
-        # previous arrival time plus an exponentially
-        # distributed interarrival time
-        new_t = t[length(t)] + rexp(n=1, rate=lambda)
-        if(new_t <= t_max){
-            t <- c(t, new_t)
-        }
-        else{
-            # t_max has been reached,
-            # and this process simulation is finished
-            # Adding dummy data point outside graphing area
-            t <- c(t, new_t, new_t + 1)
-            break
-        }
-    }
-    N <- 0:(length(t)-1)
-    new_row = data.frame(t, N)
-    g <- g + geom_step(data=new_row, color="darkgrey")
+  t = pp_realizations(lambda = lambda, t_max = t_max)
+  N <- 0:(length(t)-1)
+  new_row = data.frame(t, N)
+  g <- g + geom_step(data=new_row, color="darkgrey")
 }
-g <- g + coord_cartesian(xlim = c(0, t_max)) 
+g <- g + coord_cartesian(xlim = c(0, t_max-5)) 
 print(g)

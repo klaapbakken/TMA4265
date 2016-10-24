@@ -1,4 +1,4 @@
-We are going to use the Metropolis-Hastings algorithm to generate a Markov Chain with limiting distribution given by the binomial distribution Binomial$(n,p)$ with probability distribution
+We are going to use the Metropolis-Hastings algorithm to generate a Markov chain with limiting distribution given by the binomial distribution Binomial$(n,p)$ with probability distribution
 
 \begin{equation}
     \pi(x) = \frac{n!}{x!(n-x)!}p^x(1-p)^{n-x},
@@ -47,7 +47,7 @@ Q =
 
 which is clearly irreducible. 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{}
 Let $q_{ij}$ denote the row i column j element of $Q$. According to the Metropolis-Hastings algorithm, we can define a time reversible Markov chain ${X_n, n \geq 0}$ as follows: When $X_n = i$, let $Y$ be a random variable such that $Y = j$ with probability $P(Y = y) = q_{ij}$ for $j = 0, 1, \hdots, n$. Then let $P(X_{n+1} = j) = \alpha_{ij}$ and $P(X_{n+1} = i) = 1-\alpha_{ij}$, where we define $\alpha_{ij}$ as follows:
 
@@ -121,7 +121,7 @@ For all $i = j$ and for all $q_{ij} = 0$ (since $q_{ij} = q_{ji}$), \eqref{eq:st
 we see that assuming
 
 \begin{equation}
-    & \alpha_{ji} = \min\biggl(\dfrac{j!(n-j)!}{i!(n-i)!} \biggl(\dfrac{1-p}{p}\biggr)^{j-i}, 1\biggr) = 1
+    \alpha_{ji} = \min\biggl(\dfrac{j!(n-j)!}{i!(n-i)!} \biggl(\dfrac{1-p}{p}\biggr)^{j-i}, 1\biggr) = 1
 \end{equation}
 
 implies
@@ -134,7 +134,6 @@ and vice versa with $\alpha_{ji} = 1$. Thus \eqref{eq:statprob} is satisfied. Si
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{}
-\label{ssec:2b}
 
 The following function, \texttt{binomial\_markov\_chain}, implements the Metropolis-Hastings algorithm for our specific problem:
 
@@ -143,58 +142,40 @@ read_chunk("../.R/binomial_markov_chain.R")
 @
 
 <<binomial_markov_chain_function>>=
- 
 @
 
 The function takes the parameters $n$ and $p$ of the desired binomial distribution and the desired length of the generated Markov chain as arguments. It returns the generated Markov chain and prints the proportion of accepted proposed states. 
 
 \subsection{}
 
-In the following code we use \texttt{binomial\_markov\_chain} to simulate according to a binomial distribution with n = 20 and p = 0.3 by generating a Markov chain of length 5000. Then we plot the state of the first 200 stages.
+In the following code we use \texttt{binomial\_markov\_chain} to simulate according to a binomial distribution with n = 20 and p = 0.3 by generating a Markov chain of length 5000. Then we plot the state of the first 200 stages. The function also prints the proportion of accepted proposed states, which is approximately $80\%$. A rather lengthy argument that we are not going to include in its entirety here suggests this is reasonable. The outlines of this argument are that it is easy to see that approximately half of the used $\alpha$-values greater than $0$ are $1$, since in that case $\alpha_{ij} \neq 1 \implies \alpha_{ji} = 1 \quad \forall \: i, j \neq \{0, n\}$. Assuming these $\alpha_{ij}$ are uniformly distributed between $0$ and $1$, this suggests a proportion of accepted states of $75\%$. The reason that the obtained value is slightly higher has to do with the fact that most states are close to state $6$ and the values of $\alpha_{ij}$ in this region.
 
 <<echo=FALSE>>=
 read_chunk("../.R/plot_markov_chain.R")
 require(ggplot2)
 @
 
-<<plot_markov_chain, fig.pos="htbp", fig.cap= "First 200 stages of a simulation of a Markov chain with transition probability matrix $P$, given in task 2.b">>= 
+<<plot_markov_chain_burn_in, fig.pos="htbp", fig.cap= "First 200 stages of a simulation of a Markov chain with transition probability matrix $P$, given in task 2.b">>= 
 @
 
-No clear evidence for the need of a burn-in period is presented by the plot, shown in figure \ref{fig:plot_markov_chain} - which is not surprising. Let us look into why this is so.
+No clear evidence for the need of a burn-in period is presented by the plot, shown in figure \ref{fig:plot_markov_chain_burn_in} - which is not surprising. Let us look into why this is so.
 
-The sole purpose of using a burn-in period in order to propose an initial state, is that it is more likely that this state is in a high probability region of the desired distribution than if the initial state is chosen randomly (i.e. the distribution of the choice is uniform). That said, it is of course a possibility that the state returned after a burn-in period is a "worse" starting point than the initial point of the chain created during the burn-in. 
+The sole purpose of using a burn-in period in order to propose an initial state, is that it is more likely that this state is in a high probability region of the desired distribution than if the initial state is chosen randomly (i.e. the distribution of the choice is uniform). That said, it is of course a possibility that the state returned after a burn-in period is a "worse" starting point than the initial point of the "burn-in-chain". 
 
 In our case, the high probability regions of the distributions are known; in fact we know the most frequent outcome of simulations of the distribution is most likely the expected value of the binomial distribution with the given parameters, which is $np = 6$. Thus the initial state proposed by a burn-in period is at best as good as state $6$, which is used as initial point in our simulation. This answers why we don't need a burn-in period.
 
-So why is a high probability outcome a good initial point of the simulation? In the long run, i.e. as $n \rightarrow \infty$, it is insignificant what we choose as initial state, because it doesn't affect the limiting distribution of the chain. In practice, the simulation has to stop at some point. That is why choosing a low probability outcome may give a false impression of the distribution. For example, $20$ is an extremely unlikely outcome of our distribution ($\pi(20) = 0.3^{20} \approx 3.49 \cdot 10^{-11}$). With $5000$ simulations it is still very unlikely that this is one of the outcomes. Thus including this as the initial state of our Markov chain will almost certainly give a misleading impression of the form of the desired distribution, and is much more likely to do so than a simulated Markov chain with a higher probability outcome as initial state.
+So why is a high probability outcome a good initial point of the simulation? In the long run, i.e. as $n \rightarrow \infty$, it is insignificant what we choose as initial state, because it doesn't affect the limiting distribution of the chain. In practice, the simulation has to stop at some point. That is why choosing a low probability outcome may give a false impression of the distribution. For example, $20$ is an extremely unlikely outcome of our distribution ($\pi(20) = 0.3^{20} \approx 3.49 \cdot 10^{-11}$). With $5000$ simulations it is still very unlikely that this is one of the outcomes. Thus including this as the initial state of our generated Markov chain $X_n$ will almost certainly give a misleading impression of the form of the desired distribution, and is much more likely to do so than a Markov chain with a higher probability outcome as initial state.
 
-Now we are ready to compute the mean and variance of the simulated Markov chain: 
+Now we are ready to compute the mean and variance of the $X_n$: 
 
 <<echo=TRUE>>=
 mean(X)
 var(X)
 @
 
-The mean and variance of Binomial$(20,0.3)$ are $np = 6$ and $np(1-p) = 4.2$ respectively. Our simulated Markov chain gives results relatively close to this. The following code plots a histogram of the relative frequencies of the different states in the simulated Markov chain.
+The mean and variance of Binomial$(20,0.3)$ are $np = 6$ and $np(1-p) = 4.2$ respectively. Our generated Markov chain gives results relatively close to this. The following code plots a histogram of the relative frequencies of the different states in the $X_n$ and overlays the probability distribution of the binomial distribution. 
 
+<<plot_markov_chain_histogram, fig.pos="htbp", fig.cap= "The bars represent relative frequences of the different states in a simulated Markov chain of length $5000$. The dots show the probability distribution of Binomial$(20,0.3)$.">>=
+@
 
-
-To get more accurate results, we could  
-
-% <<echo=FALSE, cache=FALSE>>=
-% read_chunk("../.R/myrcode.R")
-% @
-
-% <<myrcode1, echo = TRUE, cache=FALSE>>=
-
-% <<myrcode2, cache=FALSE>>=
- 
-% @ 
-
-% <<echo=FALSE, cache=FALSE>>=
-% source("../.R/myrcode.R")
-% @
-
-% <<cache=FALSE>>=
-% summary(X)
-% @
+Figure~\ref{fig:plot_markov_chain_histogram} shows the resulting plot. It insinuates the same as the calculation of the mean and variance of $X_n$: That our simulation gives results relatively close to the desired distribution Binomial$(20, 0.3)$. To get more accurate results, we could simply increase the length of the simulation, i.e. the length of the generated Markov chain.
