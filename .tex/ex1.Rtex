@@ -5,7 +5,7 @@ The following matrix $\mathbf{P}$ describes the air quality in a city over conse
 \begin{figure}[htbp]
     \label{P}
     \centering
-    $\mathbf{P}$ =	\bordermatrix{
+    $\mathbf{Pa}$ =	\bordermatrix{
 	    	~ & 0 & 1 & 2 \cr
 	       0 & 0.5  & 0.35 & 0.15 \cr
 	       1 & 0.1 & 0.75  & 0.15 \cr
@@ -16,7 +16,7 @@ The probability of remaining in state 1 for two consecutive days is given by, $P
 The probability of the air quality being poor the day after tomorrow can be expressed as $P(X_2 = 1|X_0 = 1)$. The matrix of the two - step transition probabilities is given by $\mathbf{P}^{2} = \mathbf{P}^{(1+1)} = \mathbf{P}^{(1)} \cdot  \mathbf{P}^{(1)}$. The matrix multiplication gives us the following matrix, and the probability of returning to state 1 after two steps is simply $P^{2}_{11} = 0.6875$
 
 \begin{figure}[htbp]
-    \label{PSquared}
+    \label{PaSquared}
     \centering
     $\mathbf{P}^{2}$ =	\bordermatrix{
 	    	~ & 0 & 1 & 2 \cr
@@ -48,7 +48,7 @@ Solving these equations leads to the following results: $\pi_0 = \frac{29}{192} 
 
 \subsection{}
 
-<<cache=TRUE, plot1, fig.cap = "Simulated long - run distribution of the Markov chain" >>=
+<<cache=TRUE, plot1, fig.pos="htbp", fig.cap = "Simulated long - run distribution of the Markov chain" >>=
 
 P <- matrix(data=c(0.5,0.1,0.05,0.35,0.75,0.6,0.15,0.15,0.35), nrow= 3)
 lrd <- c(0,0,0)
@@ -86,7 +86,7 @@ The long - run distributions dependency on the initial state seems to decrease a
 
 We plot three different graphs, one for each inital state, see figure \ref{fig:plot2}, representing the proportion of time spent in state 0 for increasing N. The dependency on the inital state clearly gets smaller as N increases. 
 
-<<cache=TRUE,plot2, fig.cap = "Long - run distributions of state 0 as number of steps increases. One line for each of the different initial states", fig.height = 4>>=
+<<cache=TRUE, plot2, fig.pos="htbp", fig.cap = "Long - run distributions of state 0 as number of steps increases. One line for each of the different initial states", fig.height = 4>>=
 
 getlrd <- function(P, state, N){
   lrd <- c(0,0,0)
@@ -112,7 +112,7 @@ getlrd <- function(P, state, N){
 
 P <- matrix(data=c(0.5,0.1,0.05,0.35,0.75,0.6,0.15,0.15,0.35), nrow= 3)
 
-xaxis <- seq(10,700,20)
+xaxis <- seq(10,600,5)
 avlrd <- matrix(data = 0, nrow = 3, ncol = length(xaxis))
 k <- 1
 
@@ -135,17 +135,19 @@ require(reshape)
 t = data.frame(a = xaxis, '0' = avlrd[1,], '1' = avlrd[2,], '2' = avlrd[3,])
 t = melt(t, id.vars = "a")
 p <- ggplot(data=t, aes(x=a, y=value, group=variable, color = variable)) + 
-geom_smooth() + geom_point() 
+  geom_smooth() + geom_point() 
 p + labs(title = "Dependency on initial state",
-x = "Number of steps", y = "Proportion of time spent in state 0",
-colour = "Initial state")
+         x = "Number of steps", y = "Proportion of time spent in state 0",
+         colour = "Initial state") + xlim(0, 600)
 
 @
 
-\subsection{}
+\subsection{}\label{subsec:1c}
+
+The following transition matrix P models the evolution of an AIDS paients condition. State 0, 1, 2 and 3 respectively represents being dead, very sick, sick and functional.
 
 \begin{figure}[htbp]
-    \label{P}
+    \label{Pc}
     \centering
     $\mathbf{P}$ =	\bordermatrix{
 	    	~ & 0    & 1     & 2    & 3 \cr
@@ -155,89 +157,65 @@ colour = "Initial state")
            3  & 0    & 0   & 0  & 1   \cr}
 \end{figure}
 
-The chance of the patient becoming functional when starting out in state 1 is given by the following expression:
+We let $P_n$ denote the probability of starting out in state $n$ and eventually becoming functional, and we let $p_{ij}$ denote the probability of moving from state $i$ to state $j$. In addition we let $\eta$ denote the event of the patient becoming functional. 
+
+The probability of the the patient becoming functional when starting out as very sick can be expressed as 
 
 \begin{equation}
-    P(Patient\ becomes\ functional) = (\sum_{n=1}^{\infty}P_{03}{\cdot}P_{10}^{n} + P_{13}{\cdot}P_{11}^{n} + P_{23}{\cdot}P_{12}^{n}  + P_{33}{\cdot}P_{13}^{n}) + P_{13}
+\begin{gathered}
+    P(\text{Patient becomes functional}|\text{Patient is very sick}) = P_1 = P(\eta|X_0 = 1) \\= P(\eta|X_1 = 2, X_0 = 1) + P(\eta|X_1 \neq 2, X_0 = 1) = p_{12} \cdot P_2 + p_{10} \cdot P_0 + p_{11} \cdot P_1 + p_{13} \cdot P_3 \\ = p_{12} \cdot P_2 + p_{11} \cdot P_{1}
+\end{gathered}
 \end{equation}
 
-Since $P_{03}$, $P_{13}$ and $P_{33}$ are all equal to zero,  we get
+\
+This follows from $p_{13}$ = 0 and $P_0$ = 0.
+
+We also need an expression for $P_2$. This can be found in a similar manner.
 
 \begin{equation}
-    P_{23}{\cdot}\sum_{n=1}^{\infty}P_{12}^{n} = 0.3 \cdot \sum_{n=1}^{\infty}0.1^{n} = 0.3 \cdot \frac{0.1}{1 - 0.1} = \frac{3}{10} \cdot \frac{1}{9} = \frac{1}{30}
+    P_ 2 = P(\eta|X_0 = 2) = P(\eta|X_1 = 1, X_0 = 2) + P(\eta|X_1 \neq 1, X_0 = 2) = p_{21} \cdot P_1 + p_{22} \cdot P_2 + p_{23}
 \end{equation}
 
-The transition matrix can be reorganized so that it is of the following form
+\
 
-\begin{figure}[htbp]
-    \label{P}
-    \centering
-    $\mathbf{P} = 
-            \begin{blockarray}{c@{\hspace{1pt}}rrrr@{\hspace{3pt}}}
-            \begin{block}{r@{\hspace{1pt}}|@{\hspace{1pt}}
-        |@{\hspace{1pt}}rr@{\hspace{1pt}}|@{\hspace{1pt}}|}
-            & Q &  R \\
-            & 0 & I  \\
-            \end{block}
-        \end{blockarray}$
-\end{figure}
-
-with Q representing the matrix that describes steps between transient states and R representing the matrix that describes steps between transient and absorbing states. With at least one absorbing state we also get the identity matrix $I$ and a null matrix. 
-
-We want to find the expected amount of steps before we enter one of the two absorbing steps. We approach this problem by looking at the fundamental matrix N given by
-
+Solving these equations lead to 
 
 \begin{equation}
-    N = \sum_{n=1}^{\infty}Q^{n} = (I - Q)^{-1}
+    P_1 = \frac{p_{23} \cdot p_{12}}{(1-p_{11})\cdot(1-p_{22}) - p_{12} \cdot p_{21}}
 \end{equation}
 
-We get the matrix 
+\
 
-\begin{figure}[htbp]
-    \label{P}
-    \centering
-    $\mathbf{P} = 
-            \begin{blockarray}{c@{\hspace{1pt}}rrrr@{\hspace{3pt}}}
-             & 1   & 2   & 0   & 3   \\
-            \begin{block}{r@{\hspace{1pt}}|@{\hspace{1pt}}
-        |@{\hspace{1pt}}rrrr@{\hspace{1pt}}|@{\hspace{1pt}}|}
-            1 & 0.85 & 0.1 & 0.05 & 0 \\
-            2 & 0.05 & 0.65 & 0 & 0.3 \\
-            0 & 0   & 0   & 1 & 0   \\
-            3 & 0 & 0 & 0 & 1 \\
-            \end{block}
-        \end{blockarray}$
-\end{figure}
+which leads to $P_1 = 0.6316$ when the numerical values from the transition matrix are inserted.
 
-with 
+We let $N_n$ denote the expected number of steps before we enter an absorbing state when starting in state n. $N$ is a random variable that denotes the number of steps before we reach an absorbing state.
 
-\begin{figure}[htbp]
-    \label{Q}
-    \centering
-    $\mathbf{Q} = 
-            \begin{blockarray}{c@{\hspace{1pt}}rrrr@{\hspace{3pt}}}
-            \begin{block}{r@{\hspace{1pt}}|@{\hspace{1pt}}
-        |@{\hspace{1pt}}rr@{\hspace{1pt}}|@{\hspace{1pt}}|}
-            & 0.85 &  0.1 \\
-            & 0.05 & 0.65  \\
-            \end{block}
-        \end{blockarray}$
-\end{figure}
+The expected number of states before entering an absorbing state when starting in state 1 can be expressed as 
 
-the expected number of steps is given by the first element in $t = N1$ with N being the fundamental matrix and 1 being a column vector of size t and entries all 1. 
+\begin{equation}
+\begin{gathered}
+    E(N|X_0 = 1) = N_1\\ = E(N|X_1 = 0, X_0 = 1) + E(N|X_1 = 1, X_0 = 1) + E(N|X_1 = 2, X_0 = 1) + E(N|X_1 = 3, X_0 = 1) \\= p_{10} + p_{11}(N_1 + 1) + p_{12}(N_2 + 1) 
+\end{gathered}
+\end{equation}
 
+We also need the expected number of steps when starting in state 2. This can be obatained in a similar fashion as $N_1$. 
 
-<<>>=
-Q <- matrix(data=c(0.85, 0.05,0.1,0.65), nrow = 2)
-I <- diag(2)
-N <- solve(I-Q)
-t <- N%*%matrix(data=c(1,1),ncol=1)
-t[1]
-@
+\begin{equation}
+\begin{gathered}
+    E(N|X_0 = 2) = N_2\\ = E(N|X_1 = 0, X_0 = 2) + E(N|X_1 = 1, X_0 = 2) + E(N|X_1 = 2, X_0 = 2) + E(N|X_1 = 3, X_0 = 2) \\= p_{23} + p_{11}(N_2 + 1) + p_{21}(N_1 + 1)
+\end{gathered}
+\end{equation}
+
+Combining these equations leaves us with
+\begin{equation}
+    N_1 = \frac{p_{10}(1-p_{22}) + p_{11}(1 - p_{22}) + p_{12}(p_{21}+p_{23} + 1)}{(1-p_{11})(1-p_{22}) - p_{21}p_{12}}
+\end{equation}
+
+Inserting the numerical values from the transition matrix leaves us with $N_1 = 9.47368$
 
 \subsection{}
 
-The expecected number of steps is 9.47
+The expecected number of steps is 9.47, as we showed in \ref{subsec:1c}. 
 
 <<cache = TRUE>>=
 P <- matrix(data = c(1,0.05,0,0,0,0.85,0.05,0,0,0.1,0.65,0,0,0,0.3,1),nrow =4)
@@ -247,7 +225,7 @@ functional = 0
 dead = 0
 avabsorb <- 0
 
-for (i in 1:1000){
+for (i in 1:10000){
   while ((state != 1)&&(state != 4)){
     p <- runif(1)
     if (p < P[state,1]){
@@ -261,7 +239,7 @@ for (i in 1:1000){
     }
     N <- N + 1
   }
-  avabsorb <- avabsorb + N/1000
+  avabsorb <- avabsorb + N
   if (state == 1){
       dead = dead + 1
   } else if (state == 4){
@@ -271,15 +249,24 @@ for (i in 1:1000){
   state <- 2
 }
 
+avabsorb <- avabsorb/10000
+
+#avabsorb keeps track of how many steps is made before one enters an absorbing state
+#and the while - loop is exited. 
+
+#functional and dead keeps track of which state the loop ends in, in order to
+#find the probability of ending up in it. 
+
 avabsorb
-functional/(functional + dead)
+f <- functional/(functional + dead)
+f
 
 @
 
-The proportion of time the the simulated Markov chain ends up in the functional state is \Sexpr{functional/(functional+dead)}, which is in agreement with the theoretical value. 
+The proportion of time the the simulated Markov chain ends up in the functional state is \Sexpr{f}, which is not too far from the theoretical value of 0.6316. The relative difference is \Sexpr{round((abs(f-0.6316))/0.6316,5)*100}\%.
 
 
-<<cache=TRUE>>=
+<<cache=TRUE, plot3, fig.pos="htbp", fig.cap = "Variability in the stochastic process visualized by a boxplot">>=
 
 P <- matrix(data = c(1,0.05,0,0,0,0.85,0.05,0,0,0.1,0.65,0,0,0,0.3,1),nrow =4)
 state <- 2
@@ -312,7 +299,7 @@ ylab = "Number of steps")
 
 @
 
-When simulating the Markov chain 500 times we observe that the amount of steps before entering an absorbing state can differ from the expected value by a relatively high amount of steps. Here we absorve that the expected value is 9.47, but during the simulation we see that values as high as \Sexpr{max(Nvec)} occur. 
+When simulating the Markov chain 500 times we observe that the amount of steps before entering an absorbing state can differ from the expected value by a relatively high amount of steps. We have found the expected value to be 9.47, but during the simulation we see that values as high as \Sexpr{max(Nvec)} occur. 
 
 
 

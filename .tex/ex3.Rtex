@@ -1,106 +1,44 @@
 $N(t)$ denotes the number of insurance claims in the time period $(0,t)$, and is assumed to be a Poisson process. The continuous time index $t \geq 0$ denotes the days from January 1st, 0:00.00. It is additionally assumed that the year is not a leap year, e.g. 2017, which will prove crucial for some calculations.
 
 \subsection{}
+<<echo=FALSE>>=
+read_chunk("../.R/3a.R")
+@
+
 We now set the intensity to the constant $\lambda(t) = 3$, and calculate the probability of receiving more than 200 claims before March 1st, 2017. Since $N(t)$ is modeled as a Poisson process, this probability is calculated as
 $$
 P(X > x) = 1 - P(X \leq x) = 1 - e^{-\lambda t} \sum_{i=0}^{x} \frac{(\lambda t)^i}{i!}
 $$
 with $t$ is equal to the number of days elapsed since January 1st, 2017, and $x$ equal to 200. The R-function Ppois() will is able to calculate this partial sum as follows,
 
-<<cache=TRUE>>=
-lambda <- 3
-# Calculating the number of days elapsed, which gives 59
-t <- as.numeric(as.Date("2017-03-01") - as.Date("2017-01-01"), units="days")
-ppois(200, lambda=lambda*t, lower=FALSE)
-
+<<more_than_200>>=
 @
+
 giving a probability of $4.08\%$ for this to occur. To calculate the expected waiting time of the $n$th claim, $S_n$, we observe that the waiting time is equal to the sum of the first $n$ interarrival times, $T_i$. These are independent and exponentially distributed with mean $1/\lambda$, and the expected value of the sum is thus
 $$
 E[S_n] = E\Bigg[\sum_{i=1}^{n} T_i\Bigg] = n E[T_i] = \frac{n}{\lambda}.
 $$
 With $n=10$ and $\lambda=3$, this gives $10/3$ days, or put more simply, 3 days and 8 hours.
 
-<<cache=TRUE>>=
-## Part 1: Simulating number of Poisson events during the first two months of 2017
-lambda <- 3          # Poisson mean
-t = 59               # Number of days, as calculated above
-observations = 1000  # Number of simulated observations
+<<first_two_months>>=
+@
 
-# Drawing samples from Poisson distribution
-V <- rpois(observations, lambda=lambda*t)
+<<tenth_arrival_time>>=
+@
 
-# Calculating percentage of samples larger than 200
-sum(V > 200) / observations * 100
-
-
-## Part 2: Simulating arrival times of the tenth Poisson event
-n <- 10 # Tenth event
-# Drawing samples from the Gamma distribution
-W <- rgamma(observations, n, lambda)
-# Calculating the mean arrival time
-mean(W)
-
-
-## Part 3: Plotting 100 Poisson processes as a function of time
-
-# Looking at 100 Poisson processes the first 6 days
-processes = 100
-t_max = 6
-
-# Specifying data types and which data to plot
-require(ggplot2)
-df <- data.frame(t = numeric(), N = numeric())
-g <- ggplot(df, aes(t, N))
-
-# Generating the 100 independent Poisson processes
-for(b in 1:100){
-    # N(t=0) = 0, the first axiom of Poisson processes
-    t <- c(0)
-    repeat{
-        # Generate the next event's arrival time as the
-        # previous arrival time plus an exponentially
-        # distributed interarrival time
-        new_t = t[length(t)] + rexp(n=1, rate=lambda)
-        if(new_t <= t_max){
-            t <- c(t, new_t)
-        }
-        else{
-            # t_max has been reached,
-            # and this process simulation is finished
-            # Adding dummy data point outside graphing area
-            t <- c(t, new_t, new_t + 1)
-            break
-        }
-    }
-    N <- 0:(length(t)-1)
-    new_row = data.frame(t, N)
-    g <- g + geom_step(data=new_row, color="darkgrey")
-}
-g <- g + coord_cartesian(xlim = c(0, t_max)) 
-print(g)
+<<simulations>>=
 @
 
 \subsection{}
-The Poisson process is now considered to be nonhomogeneous, with an intensity given by $\lambda(t)=2+\cos(t \pi/182.5)$. The probability of receiving more than 200 claims before March 1st can now be found by calculating the value of the mean value function,
+<<echo=FALSE>>=
+read_chunk("../.R/3b.R")
+
+@
+The Poisson process is now considered to be nonhomogeneous, with an intensity given by $\lambda(t)=2+\cos(t \pi/182.5)$. The probability of receiving more than 200 claims before March 1st can now be found by calculating the value of the \textit{mean value function},
 $$
-m(t) = \int_0^t \lambda(y) \text{d}y = \int_0^t 2+\cos(y \pi/182.5) \text{d}y  = 2t + \frac{182.5}{\pi} \sin(t \pi/182.5).
+m(t) = \int_0^t \lambda(y) \text{d}y = \int_0^t (2+\cos(y \pi/182.5)) \text{d}y  = 2t + \frac{182.5}{\pi} \sin(t \pi/182.5).
 $$
 For $t = 59$, this gives
-<<cache=TRUE>>=
-t = 59
-k = pi / 182.5
-m <- 2*t + (1/k) * sin(k*t)
-print(m)
-
-ppois(200, lambda=m, lower=FALSE)
-
-## Part 1: Simulating number of Poisson events during the first two months of 2017
-observations = 1000  # Number of simulated observations
-
-# Drawing samples from Poisson distribution
-V <- rpois(observations, lambda=m)
-
-# Calculating percentage of samples larger than 200
-sum(V > 200) / observations * 100
+<<nh_more_than_200>>=
 @
 i.e. $m(t=59) = 167.367$.
